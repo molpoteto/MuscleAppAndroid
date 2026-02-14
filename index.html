@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>筋トレは裏切らない</title>
+    <meta name="description" content="プランクと自重トレーニングの継続をサポートするシンプル＆プレミアムな記録アプリ">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --accent-color: #e94560;
+            --secondary-accent: #0f3460;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --success-color: #4caf50;
+            --glass-bg: rgba(22, 33, 62, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --font-main: 'Inter', 'Noto Sans JP', sans-serif;
+            --safe-area-bottom: env(safe-area-inset-bottom);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            /* Fallback */
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .text-accent {
+            color: var(--accent-color);
+        }
+
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-accent);
+            border-radius: 3px;
+        }
+
+        /* Main Container */
+        #app {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: linear-gradient(90deg, #fff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Content Area */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            padding-bottom: calc(4rem + var(--safe-area-bottom));
+            /* Nav height + safe area */
+            scroll-behavior: smooth;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Plank Timer */
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 300;
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+            margin: 1rem 0;
+            color: var(--text-primary);
+            text-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+            text-align: center;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-accent);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .set-counter {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Workout List */
+        .workout-item {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .workout-item:last-child {
+            border-bottom: none;
+        }
+
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .workout-name {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .workout-count {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .workout-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 0.6rem 0;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .control-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn.minus {
+            color: #ff6b6b;
+        }
+
+        .control-btn.plus {
+            color: #51cf66;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            padding-bottom: var(--safe-area-bottom);
+            z-index: 20;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 2px;
+        }
+
+        /* Calendar & Graph */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 1rem;
+        }
+
+        .cw-header {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding-bottom: 0.5rem;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            position: relative;
+        }
+
+        .day-cell.today {
+            border: 1px solid var(--accent-color);
+        }
+
+        .day-cell.has-data {
+            background: rgba(233, 69, 96, 0.2);
+        }
+
+        .day-cell.level-1 {
+            background: rgba(233, 69, 96, 0.2);
+        }
+
+        .day-cell.level-2 {
+            background: rgba(233, 69, 96, 0.5);
+        }
+
+        .day-cell.level-3 {
+            background: rgba(233, 69, 96, 0.8);
+        }
+
+        .day-number {
+            font-weight: 600;
+        }
+
+        .day-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--text-primary);
+            margin-top: 2px;
+            display: none;
+        }
+
+        .has-data .day-dot {
+            display: block;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .view-btn.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Graph container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>筋トレは裏切らない</h1>
+        <button class="settings-btn" id="openSettings">⚙️</button>
+    </header>
+
+    <div id="app">
+        <!-- Home View -->
+        <main id="view-home">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">今日のプランク</span>
+                    <button class="btn-outline btn-small" id="editTimer">⏱️ 設定</button>
+                </div>
+                <div class="timer-display" id="timerDisplay">00:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-primary" id="startTimer">START</button>
+                    <button class="btn btn-secondary hidden" id="pauseTimer">PAUSE</button>
+                    <button class="btn btn-outline" id="resetTimer">RESET</button>
+                </div>
+                <p class="set-counter" id="todayPlankStats">完了: 0セット</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">今日のトレーニング</span>
+                </div>
+                <div id="workoutList">
+                    <!-- Javascript will populate this -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Stats View (Calendar & Graph) -->
+        <main id="view-stats" class="hidden">
+            <div class="card">
+                <div class="view-toggle">
+                    <div class="view-btn active" data-view="week">週間</div>
+                    <div class="view-btn" data-view="month">月間</div>
+                    <div class="view-btn" data-view="year">年間</div>
+                </div>
+
+                <h3 class="text-center mb-4" id="statsDateRange">2026年 2月</h3>
+
+                <!-- Graph Area -->
+                <div class="chart-container">
+                    <canvas id="statsChart"></canvas>
+                </div>
+
+                <!-- Calendar/List Area (Dynamic) -->
+                <div id="statsContent" class="mt-4">
+                    <!-- Calendar or detailed list goes here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <nav>
+        <div class="nav-item active" data-target="view-home">
+            <div class="nav-icon">💪</div>
+            <span>記録</span>
+        </div>
+        <div class="nav-item" data-target="view-stats">
+            <div class="nav-icon">📊</div>
+            <span>実績</span>
+        </div>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <h3 class="modal-title">設定</h3>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm text-secondary">プランク目標時間 (秒)</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="baseTimerSettings"
+                            class="w-full p-2 rounded bg-opacity-10 bg-white border border-gray-600 text-white"
+                            value="60">
+                        <button class="btn btn-secondary btn-small" id="saveTimerSettings">保存</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">※自動延長: ON (上限600秒)</p>
+                </div>
+
+                <hr class="border-gray-700 my-4">
+
+                <div class="mb-4">
+                    <h4 class="font-bold mb-2 text-sm">データ管理</h4>
+                    <button class="btn btn-outline w-full mb-2" id="exportData">📤 データをバックアップ</button>
+                    <div class="flex gap-2">
+                        <input type="file" id="importFile" class="hidden" accept=".json">
+                        <button class="btn btn-outline w-full" id="importDataBtn">📥 データを復元</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline btn-small" id="closeSettings">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Manual Edit Modal -->
+    <div class="modal-overlay" id="timerEditModal">
+        <div class="modal-content">
+            <h3 class="modal-title">今日のタイマー設定</h3>
+            <div class="modal-body">
+                <p class="text-sm text-gray-400 mb-4">今日はちょっと頑張る？それとも少し軽めに？</p>
+                <div class="flex items-center justify-center gap-4 mb-4">
+                    <button class="btn btn-outline btn-icon" id="tempTimerMinus">-5</button>
+                    <span class="text-2xl font-bold" id="tempTimerValue">60</span>
+                    <button class="btn btn-outline btn-icon" id="tempTimerPlus">+5</button>
+                </div>
+                <p class="text-xs text-center text-gray-500">※ここでの変更は今日の設定にのみ適用されます。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-full" id="applyTempTimer">適用する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(233, 69, 96, 0.9); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200;">
+        Message
+    </div>
+
+
+    <script>
+        /**
+         * 筋トレは裏切らない - App Logic
+         */
+
+        // --- Constants & Config ---
+        const DEFAULT_PLANK_SECONDS = 60;
+        const MAX_PLANK_SECONDS = 600;
+        const INCREMENT_SECONDS = 5;
+        const WORKOUT_TYPES = [
+            { id: 'pushup', name: '腕立て伏せ', unit: '回' },
+            { id: 'squat', name: 'スクワット', unit: '回' },
+            { id: 'crunch', name: 'クランチ', unit: '回' },
+            { id: 'backext', name: 'バックエクステンション', unit: '回' }
+        ];
+
+        // --- State Management ---
+        const store = {
+            data: {
+                settings: {
+                    plankBaseSeconds: DEFAULT_PLANK_SECONDS,
+                    lastPlankDate: null,
+                    consecutiveDays: 0 // Optional: future use
+                },
+                logs: {} // Format: "YYYY-MM-DD": { plankSeconds: 0, plankSets: 0, workouts: { pushup: 0, ... } }
+            },
+
+            viewState: {
+                timerRunning: false,
+                timerPaused: false,
+                timeLeft: DEFAULT_PLANK_SECONDS,
+                currentPlankSettings: DEFAULT_PLANK_SECONDS,
+                intervalId: null,
+                currentChartType: 'week' // week, month, year
+            },
+
+            init() {
+                const saved = localStorage.getItem('kintore_data');
+                if (saved) {
+                    try {
+                        this.data = JSON.parse(saved);
+                        // Schema migration if needed could go here
+                        if (!this.data.logs) this.data.logs = {};
+                        // Ensure settings object exists
+                        if (!this.data.settings) {
+                            this.data.settings = {
+                                plankBaseSeconds: DEFAULT_PLANK_SECONDS,
+                                lastPlankDate: null,
+                                consecutiveDays: 0
+                            };
+                        }
+                    } catch (e) {
+                        console.error("Data parse error", e);
+                    }
+                }
+
+                this.checkDayChange();
+            },
+
+            save() {
+                localStorage.setItem('kintore_data', JSON.stringify(this.data));
+            },
+
+            checkDayChange() {
+                const today = getTodayStr();
+                const yesterday = getYesterdayStr();
+
+                // Auto increment logic
+                const lastDate = this.data.settings.lastPlankDate;
+
+                // If we haven't processed today yet
+                if (lastDate !== today) {
+                    // Check yesterday's performance
+                    const yesterdayLog = this.data.logs[yesterday];
+                    if (yesterdayLog && yesterdayLog.plankSets >= 1) {
+                        // User did it yesterday! Increment base!
+                        // Only if not already at max
+                        if (this.data.settings.plankBaseSeconds < MAX_PLANK_SECONDS) {
+                            this.data.settings.plankBaseSeconds += INCREMENT_SECONDS;
+                            showToast(`継続達成！初期設定が ${this.data.settings.plankBaseSeconds}秒 になりました！`);
+                        }
+                    }
+                    // Update last check date (actually update it when they FINISH a set today to secure the "next day" logic,
+                    // BUT for the initialization of "Today's Timer Base", we use settings.plankBaseSeconds)
+                }
+
+                this.viewState.currentPlankSettings = this.data.settings.plankBaseSeconds;
+                this.viewState.timeLeft = this.viewState.currentPlankSettings;
+            },
+
+            getTodayLog() {
+                const today = getTodayStr();
+                if (!this.data.logs[today]) {
+                    this.data.logs[today] = { plankSeconds: 0, plankSets: 0, workouts: {} };
+                    WORKOUT_TYPES.forEach(w => this.data.logs[today].workouts[w.id] = 0);
+                }
+                return this.data.logs[today];
+            },
+
+            recordPlankSet(seconds) {
+                const log = this.getTodayLog();
+                log.plankSets = (log.plankSets || 0) + 1;
+                log.plankSeconds = (log.plankSeconds || 0) + seconds;
+
+                // Mark that we did plank today for updating logic tomorrow
+                this.data.settings.lastPlankDate = getTodayStr();
+
+                this.save();
+                updateUI();
+            },
+
+            updateWorkout(id, delta) {
+                const log = this.getTodayLog();
+                if (!log.workouts) log.workouts = {}; // Safety
+
+                const current = log.workouts[id] || 0;
+                const next = Math.max(0, current + delta);
+                log.workouts[id] = next;
+
+                this.save();
+                updateUI();
+            },
+
+            getStats(range) { // simple range getter
+                // returns arrays for chart.js
+                const labels = [];
+                const plankData = [];
+                const workoutData = {}; // key: id, val: []
+                WORKOUT_TYPES.forEach(w => workoutData[w.id] = []);
+
+                const today = new Date();
+                let days = 7;
+
+                if (range === 'week') days = 7;
+                else if (range === 'month') days = 30; // approx
+                else if (range === 'year') days = 12; // months
+
+                if (range === 'year') {
+                    // Logic for monthly aggregation would go here
+                    // Simplified for now: Last 12 days for demo or implement true monthly agg
+                    // Let's implement true monthly agg for year view
+                    for (let i = 11; i >= 0; i--) {
+                        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                        const label = `${d.getMonth() + 1}月`;
+                        labels.push(label);
+
+                        // Aggregate for this month
+                        let pTotal = 0;
+                        let wTotals = {};
+                        WORKOUT_TYPES.forEach(w => wTotals[w.id] = 0);
+
+                        const yearStr = d.getFullYear();
+                        const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+                        const prefix = `${yearStr}-${monthStr}`;
+
+                        Object.keys(this.data.logs).forEach(dateKey => {
+                            if (dateKey.startsWith(prefix)) {
+                                const l = this.data.logs[dateKey];
+                                pTotal += (l.plankSeconds || 0);
+                                WORKOUT_TYPES.forEach(w => wTotals[w.id] += (l.workouts[w.id] || 0));
+                            }
+                        });
+
+                        plankData.push(Math.round(pTotal / 60)); // Minutes
+                        WORKOUT_TYPES.forEach(w => workoutData[w.id].push(wTotals[w.id]));
+                    }
+                } else {
+                    // Day by day
+                    for (let i = days - 1; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(today.getDate() - i);
+                        const dStr = getDateStr(d);
+
+                        labels.push(range === 'week' ? ['日', '月', '火', '水', '木', '金', '土'][d.getDay()] : d.getDate());
+
+                        const log = this.data.logs[dStr] || { plankSeconds: 0, workouts: {} };
+                        plankData.push(log.plankSeconds || 0);
+                        WORKOUT_TYPES.forEach(w => {
+                            workoutData[w.id].push((log.workouts && log.workouts[w.id]) || 0);
+                        });
+                    }
+                }
+
+                return { labels, plankData, workoutData };
+            }
+        };
+
+        // --- Helpers ---
+        function getTodayStr() { return getDateStr(new Date()); }
+        function getYesterdayStr() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            return getDateStr(d);
+        }
+        function getDateStr(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            if (!el) return;
+            el.textContent = msg;
+            el.style.opacity = '1';
+            el.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translate(-50%, -20px)';
+            }, 3000);
+        }
+
+        // --- UI Logic ---
+        function initUI() {
+            // Workout List Generation
+            const list = document.getElementById('workoutList');
+            if (!list) throw new Error("workoutList element not found");
+
+            WORKOUT_TYPES.forEach(w => {
+                const div = document.createElement('div');
+                div.className = 'workout-item';
+                div.innerHTML = `
+                <div class="workout-header">
+                    <span class="workout-name">${w.name}</span>
+                    <span class="workout-count" id="count-${w.id}">0 ${w.unit}</span>
+                </div>
+                <div class="workout-controls">
+                    <div class="control-btn minus" onclick="onWorkoutDelta('${w.id}', -10)">-10</div>
+                    <div class="control-btn minus" onclick="onWorkoutDelta('${w.id}', -1)">-1</div>
+                    <div class="control-btn plus" onclick="onWorkoutDelta('${w.id}', 1)">+1</div>
+                    <div class="control-btn plus" onclick="onWorkoutDelta('${w.id}', 10)">+10</div>
+                </div>
+            `;
+                list.appendChild(div);
+            });
+
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    el.classList.add('active');
+
+                    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+                    document.getElementById(el.dataset.target).classList.remove('hidden');
+
+                    if (el.dataset.target === 'view-stats') {
+                        renderChart();
+                    }
+                });
+            });
+
+            // Settings
+            const settingsBtn = document.getElementById('openSettings');
+            if (settingsBtn) settingsBtn.addEventListener('click', () => document.getElementById('settingsModal').classList.add('open'));
+
+            const closeSettingsBtn = document.getElementById('closeSettings');
+            if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => document.getElementById('settingsModal').classList.remove('open'));
+
+            // Timer Controls
+            document.getElementById('startTimer').addEventListener('click', startTimer);
+            document.getElementById('pauseTimer').addEventListener('click', pauseTimer);
+            document.getElementById('resetTimer').addEventListener('click', resetTimer);
+
+            // Timer Edit
+            document.getElementById('editTimer').addEventListener('click', openTimerEdit);
+            document.getElementById('applyTempTimer').addEventListener('click', applyTempTimer);
+            document.getElementById('tempTimerMinus').addEventListener('click', () => adjustTempTimer(-5));
+            document.getElementById('tempTimerPlus').addEventListener('click', () => adjustTempTimer(5));
+
+            // Chart Toggles
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    store.viewState.currentChartType = btn.dataset.view;
+                    renderChart();
+                });
+            });
+
+            // Backup
+            document.getElementById('exportData').addEventListener('click', exportData);
+            document.getElementById('importDataBtn').addEventListener('click', () => document.getElementById('importFile').click());
+            document.getElementById('importFile').addEventListener('change', importData);
+
+            // Initial Render
+            store.init();
+            updateUI();
+        }
+
+        // --- Timer Logic ---
+        function updateTimerDisplay() {
+            const min = Math.floor(store.viewState.timeLeft / 60);
+            const sec = store.viewState.timeLeft % 60;
+            const el = document.getElementById('timerDisplay');
+            if (el) el.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (store.viewState.timeLeft <= 0) return;
+
+            document.getElementById('startTimer').classList.add('hidden');
+            document.getElementById('pauseTimer').classList.remove('hidden');
+
+            store.viewState.timerRunning = true;
+            store.viewState.intervalId = setInterval(() => {
+                store.viewState.timeLeft--;
+                updateTimerDisplay();
+
+                if (store.viewState.timeLeft <= 0) {
+                    completeSet();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(store.viewState.intervalId);
+            store.viewState.timerRunning = false;
+            document.getElementById('startTimer').classList.remove('hidden');
+            document.getElementById('pauseTimer').classList.add('hidden');
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            store.viewState.timeLeft = store.viewState.currentPlankSettings;
+            updateTimerDisplay();
+        }
+
+        function completeSet() {
+            pauseTimer();
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YXoGAACBhYqFbF1fdJivrJBhNjNtW6C6s5ZhNjNtmLq1l2E2M22YurWXYTYzbZi6tZdhNjNtmLq1l2E2M22YurWXYTYzbZi6tZdhNjNtmLq1l2E2M22YurWXYTYz'); // Short beep logic or placeholder
+            // Play sound logic here (requires user interaction first typically, which start button covers)
+            try {
+                // Simple osc if allowed
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                osc.frequency.value = 880;
+                osc.connect(ctx.destination);
+                osc.start();
+                setTimeout(() => osc.stop(), 500);
+            } catch (e) { }
+
+            store.recordPlankSet(store.viewState.currentPlankSettings);
+            showToast("1セット完了！お疲れ様です！");
+
+            // Auto reset for next set
+            setTimeout(() => {
+                resetTimer();
+            }, 1000);
+        }
+
+        function openTimerEdit() {
+            document.getElementById('tempTimerValue').textContent = store.viewState.currentPlankSettings;
+            document.getElementById('timerEditModal').classList.add('open');
+        }
+
+        function adjustTempTimer(delta) {
+            let val = parseInt(document.getElementById('tempTimerValue').textContent);
+            val = Math.max(5, val + delta);
+            document.getElementById('tempTimerValue').textContent = val;
+        }
+
+        function applyTempTimer() {
+            const val = parseInt(document.getElementById('tempTimerValue').textContent);
+            store.viewState.currentPlankSettings = val;
+            resetTimer(); // Apply immediately
+            document.getElementById('timerEditModal').classList.remove('open');
+            showToast(`今回のタイマーを ${val}秒 に設定しました`);
+        }
+
+        // --- Workout Logic ---
+        window.onWorkoutDelta = function (id, delta) {
+            store.updateWorkout(id, delta);
+        }
+
+        function updateUI() {
+            const log = store.getTodayLog();
+
+            // Update Stats on Home
+            const statsEl = document.getElementById('todayPlankStats');
+            if (statsEl) statsEl.textContent = `今日: 完了 ${log.plankSets || 0}セット (計 ${log.plankSeconds || 0}秒)`;
+
+            // Update Workout Sets
+            WORKOUT_TYPES.forEach(w => {
+                const val = (log.workouts && log.workouts[w.id]) || 0;
+                const el = document.getElementById(`count-${w.id}`);
+                if (el) el.textContent = `${val} ${w.unit}`;
+            });
+
+            updateTimerDisplay();
+        }
+
+        // --- Chart Logic ---
+        let chartInstance = null;
+
+        function renderChart() {
+            if (typeof Chart === 'undefined') {
+                const ctx = document.getElementById('statsChart');
+                if (ctx && !ctx.parentElement.querySelector('p')) {
+                    const p = document.createElement('p');
+                    p.textContent = "グラフを表示するにはインターネット接続が必要です";
+                    p.style.color = "red";
+                    p.style.textAlign = "center";
+                    ctx.parentElement.appendChild(p);
+                }
+                return;
+            }
+
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            const range = store.viewState.currentChartType;
+            const data = store.getStats(range);
+
+            if (chartInstance) chartInstance.destroy();
+
+            const datasets = [
+                {
+                    label: 'プランク (秒/分)',
+                    data: data.plankData,
+                    backgroundColor: 'rgba(233, 69, 96, 0.5)',
+                    borderColor: '#e94560',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                }
+            ];
+
+            // Add first 2 workouts just to not clutter too much, or all
+            // Let's add all but with different colors
+            const colors = ['#4caf50', '#f1c40f', '#3498db', '#9b59b6'];
+            WORKOUT_TYPES.forEach((w, i) => {
+                datasets.push({
+                    label: w.name,
+                    data: data.workoutData[w.id],
+                    borderColor: colors[i % colors.length],
+                    backgroundColor: colors[i % colors.length],
+                    borderWidth: 2,
+                    type: 'line',
+                    tension: 0.3,
+                    pointRadius: 2,
+                    yAxisID: 'y1'
+                });
+            });
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar', // Mixed chart
+                data: {
+                    labels: data.labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#a0a0a0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'プランク時間', color: '#e94560' },
+                            ticks: { color: '#a0a0a0' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '回数', color: '#4caf50' },
+                            ticks: { color: '#a0a0a0' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Backup ---
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store.data));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "kintore_backup_" + getTodayStr() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (json && json.logs) {
+                        // Merge strategy: Overwrite
+                        if (confirm("現在のデータを上書きして復元しますか？")) {
+                            store.data = json;
+                            store.save();
+                            store.init(); // Re-init logic
+                            updateUI();
+                            showToast("データを復元しました");
+                            document.getElementById('settingsModal').classList.remove('open');
+                        }
+                    } else {
+                        alert("無効なデータ形式です。");
+                    }
+                } catch (err) {
+                    alert("ファイルの読み込みに失敗しました: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => logError('SW registration failed: ' + err.message));
+            });
+        }
+
+        // Start
+        initUI();
+
+    </script>
+</body>
+
+</html>
